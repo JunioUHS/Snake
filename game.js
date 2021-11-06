@@ -1,10 +1,10 @@
-export default function createGame() {
+export default function createGame(document) {
     const state = {
         players: {},
         fruits: {},
         screen: {
-            width: 10,
-            height: 10
+            width: 30,
+            height: 30
         }
     };
 
@@ -12,11 +12,19 @@ export default function createGame() {
         const playerId = command.playerId;
         const playerX = command.playerX;
         const playerY = command.playerY;
+        const currentMovement = command.currentMovement;
+        const body = command.body;
 
         state.players[playerId] = {
             x: playerX,
-            y: playerY
+            y: playerY,
+            currentMovement: currentMovement,
+            body: body
         };
+    }
+
+    function addBodyPlayer(player) {
+        player.body.push({ x: player.x, y: player.y });
     }
 
     function removePlayer(command) {
@@ -45,25 +53,48 @@ export default function createGame() {
     function movePlayer(command) {
         const acceptedMoves = {
             ArrowUp(player) {
-                if (player.y - 1 >= 0) {
-                    player.y -= 1;
+                if (player.currentMovement !== 'ArrowDown') {
+                    player.currentMovement = 'ArrowUp';
+                    moveBody(player);
+                    player.y - 1 >= 0 ? player.y -= 1 : player.y += 29;
                 }
             },
             ArrowRight(player) {
-                if (player.x + 1 < state.screen.width) {
-                    player.x += 1;
+                if (player.currentMovement !== 'ArrowLeft') {
+                    player.currentMovement = 'ArrowRight';
+                    moveBody(player);
+                    player.x + 1 < state.screen.width ? player.x += 1 : player.x = 0;
                 }
             },
             ArrowDown(player) {
-                if (player.y + 1 < state.screen.height) {
-                    player.y += 1;
+                if (player.currentMovement !== 'ArrowUp') {
+                    player.currentMovement = 'ArrowDown';
+                    moveBody(player);
+                    player.y + 1 < state.screen.height ? player.y += 1 : player.y = 0;
                 }
             },
             ArrowLeft(player) {
-                if (player.x - 1 >= 0) {
-                    player.x -= 1;
+                if (player.currentMovement !== 'ArrowRight') {
+                    player.currentMovement = 'ArrowLeft';
+                    moveBody(player);
+                    player.x - 1 >= 0 ? player.x -= 1 : player.x += 29;
                 }
             }
+        }
+
+        function moveBody(player) {
+            const maxPosition = player.body.length - 1;
+            for (let i = maxPosition; i >= 0; i--) {
+                const body = player.body[i];
+                if (i > 0) {
+                    body.x = player.body[i - 1].x;
+                    body.y = player.body[i - 1].y;
+                } else {
+                    body.x = player.x;
+                    body.y = player.y;
+                }
+            }
+            console.log(player.body);
         }
 
         const keyPressed = command.keyPressed;
@@ -77,6 +108,14 @@ export default function createGame() {
         }
     }
 
+    function autoMove() {
+        for (const playerId in state.players) {
+            const player = state.players[playerId];
+            console.log(player);
+            movePlayer({ playerId: playerId, keyPressed: player.currentMovement });
+        }
+    }
+
     function checkForFruitCollision(playerId) {
         const player = state.players[playerId];
 
@@ -84,10 +123,13 @@ export default function createGame() {
             const fruit = state.fruits[fruitId];
 
             if (player.x === fruit.x && player.y === fruit.y) {
+                addBodyPlayer(player);
                 removeFruit({ fruitId });
             }
         }
     }
+
+    
 
     return {
         addPlayer,
@@ -95,6 +137,7 @@ export default function createGame() {
         addFruit,
         removeFruit,
         movePlayer,
+        autoMove,
         state
     };
 }
