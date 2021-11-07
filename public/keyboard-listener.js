@@ -1,10 +1,19 @@
 export default function createKeyoardListener(document) {
     const state = {
-        observers: []
+        observers: [],
+        playerId: null
     };
+
+    function registerPlayerId(playerId) {
+        state.playerId = playerId;
+    }
 
     function subscribe(observerFunction) {
         state.observers.push(observerFunction);
+    }
+
+    function unsubscribeAll() {
+        state.observers = [];
     }
 
     function notifyAll(command) {
@@ -19,7 +28,8 @@ export default function createKeyoardListener(document) {
         const keyPressed = event.key;
         
         const command = {
-            playerId: 'player1',
+            type: 'move-player',
+            playerId: state.playerId,
             keyPressed
         }
 
@@ -27,6 +37,8 @@ export default function createKeyoardListener(document) {
     }
     
     return {
-        subscribe
+        subscribe,
+        unsubscribeAll,
+        registerPlayerId
     };
 }

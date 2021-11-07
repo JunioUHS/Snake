@@ -1,0 +1,30 @@
+{
+  "name": "snake",
+  "version": "1.0.0",
+  "description": "jogo da cobrinha",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JunioUHS/Snake.git"
+  },
+  "keywords": [
+    "snake",
+    "fruit",
+    "player"
+  ],
+  "author": "Junio",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JunioUHS/Snake/issues"
+  },
+  "homepage": "https://github.com/JunioUHS/Snake#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.3.1"
+  }
+}

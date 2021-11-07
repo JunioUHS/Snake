@@ -1,4 +1,4 @@
-export default function createGame(document) {
+export default function createGame() {
     const state = {
         players: {},
         fruits: {},
@@ -8,12 +8,39 @@ export default function createGame(document) {
         }
     };
 
+    const observers = [];
+
+    function start() {
+        const frequencyFruit = 2000;
+        const frequencyAutoMove = 700;
+
+        setInterval(addFruit, frequencyFruit);
+        setInterval(autoMove, frequencyAutoMove);
+    }
+
+    function subscribe(observerFunction) {
+        observers.push(observerFunction);
+    }
+
+    function notifyAll(command) {
+        for (const observerFunction of observers) {
+            observerFunction(command);
+        }
+    }
+
+    function setState(newState) {
+        Object.assign(state, newState);
+    }
+
     function addPlayer(command) {
         const playerId = command.playerId;
-        const playerX = command.playerX;
-        const playerY = command.playerY;
-        const currentMovement = command.currentMovement;
-        const body = command.body;
+        const playerX = 'playerX' in command ? command.playerX : Math.floor(Math.random() * state.screen.width);
+        const playerY = 'playerY' in command ? command.playerY : Math.floor(Math.random() * state.screen.height);
+        const currentMovement = command.currentMovement ? command.currentMovement : 'ArrowRight';
+        const body = command.body ? command.body : [
+            { x: playerX - 1, y: playerY }, 
+            { x: playerX - 2, y: playerY }
+        ];
 
         state.players[playerId] = {
             x: playerX,
@@ -21,6 +48,15 @@ export default function createGame(document) {
             currentMovement: currentMovement,
             body: body
         };
+
+        notifyAll({
+            type: 'add-player',
+            playerId,
+            playerX,
+            playerY,
+            currentMovement,
+            body
+        });
     }
 
     function addBodyPlayer(player) {
@@ -31,26 +67,45 @@ export default function createGame(document) {
         const playerId = command.playerId;
 
         delete state.players[playerId];
+
+        notifyAll({
+            type: 'remove-player',
+            playerId
+        });
     }
 
     function addFruit(command) {
-        const fruitId = command.fruitId;
-        const fruitX = command.fruitX;
-        const fruitY = command.fruitY;
+        const fruitId = command ? command.fruitId : Math.floor(Math.random() * 10000000);
+        const fruitX = command ? command.fruitX : Math.floor(Math.random() * state.screen.width);
+        const fruitY = command ? command.fruitY : Math.floor(Math.random() * state.screen.height);
 
         state.fruits[fruitId] = {
             x: fruitX,
             y: fruitY
         };
+
+        notifyAll({
+            type: 'add-fruit',
+            fruitId,
+            fruitX,
+            fruitY
+        });
     }
 
     function removeFruit(command) {
         const fruitId = command.fruitId;
 
         delete state.fruits[fruitId];
+
+        notifyAll({
+            type: 'remove-fruit',
+            fruitId
+        });
     }
 
     function movePlayer(command) {
+        notifyAll(command);
+
         const acceptedMoves = {
             ArrowUp(player) {
                 if (player.currentMovement !== 'ArrowDown') {
@@ -94,7 +149,6 @@ export default function createGame(document) {
                     body.y = player.y;
                 }
             }
-            console.log(player.body);
         }
 
         const keyPressed = command.keyPressed;
@@ -111,8 +165,7 @@ export default function createGame(document) {
     function autoMove() {
         for (const playerId in state.players) {
             const player = state.players[playerId];
-            console.log(player);
-            movePlayer({ playerId: playerId, keyPressed: player.currentMovement });
+            movePlayer({ type: 'auto-move', playerId: playerId, keyPressed: player.currentMovement });
         }
     }
 
@@ -129,9 +182,10 @@ export default function createGame(document) {
         }
     }
 
-    
-
     return {
+        start,
+        subscribe,
+        setState,
         addPlayer,
         removePlayer,
         addFruit,
