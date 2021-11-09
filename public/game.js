@@ -12,10 +12,10 @@ export default function createGame() {
 
     function start() {
         const frequencyFruit = 2000;
-        const frequencyAutoMove = 700;
+        // const frequencyAutoMove = 700;
 
         setInterval(addFruit, frequencyFruit);
-        setInterval(autoMove, frequencyAutoMove);
+        // setInterval(autoMove, frequencyAutoMove);
     }
 
     function subscribe(observerFunction) {

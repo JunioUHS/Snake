@@ -40,6 +40,34 @@
             keyboardListener.subscribe(command => {
                 socket.emit('move-player', command);
             });
+
+            socket.on('add-player', command => {
+                game.addPlayer(command);
+            });
+
+            socket.on('remove-player', command => {
+                game.removePlayer(command);
+            });
+
+            socket.on('move-player', command => {
+                const playerId = socket.id
+
+                if (playerId !== command.playerId) {
+                    game.movePlayer(command);
+                }
+            });
+
+            socket.on('auto-move', command => {
+                game.movePlayer(command);
+            });
+
+            socket.on('add-fruit', command => {
+                game.addFruit(command);
+            });
+
+            socket.on('remove-fruit', command => {
+                game.removeFruit(command);
+            });
         });
         
         socket.on('connect', () => {
@@ -47,34 +75,6 @@
             
             const screen = document.getElementById('screen');
             renderScreen(screen, game, requestAnimationFrame, playerId);
-        });
-
-        socket.on('add-player', command => {
-            game.addPlayer(command);
-        });
-
-        socket.on('remove-player', command => {
-            game.removePlayer(command);
-        });
-
-        socket.on('move-player', command => {
-            const playerId = socket.id
-
-            if (playerId !== command.playerId) {
-                game.movePlayer(command);
-            }
-        });
-
-        socket.on('auto-move', command => {
-            game.movePlayer(command);
-        });
-
-        socket.on('add-fruit', command => {
-            game.addFruit(command);
-        });
-
-        socket.on('remove-fruit', command => {
-            game.removeFruit(command);
         });
     </script>
 </body>

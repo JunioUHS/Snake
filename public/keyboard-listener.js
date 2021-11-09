@@ -12,10 +12,6 @@ export default function createKeyoardListener(document) {
         state.observers.push(observerFunction);
     }
 
-    function unsubscribeAll() {
-        state.observers = [];
-    }
-
     function notifyAll(command) {
         for (const observerFunction of state.observers) {
             observerFunction(command);
@@ -38,7 +34,6 @@ export default function createKeyoardListener(document) {
     
     return {
         subscribe,
-        unsubscribeAll,
         registerPlayerId
     };
 }
