@@ -12,7 +12,7 @@ export default function createGame() {
 
     function start() {
         const frequencyFruit = 2000;
-        const frequencyAutoMove = 15;
+        const frequencyAutoMove = 10;
 
         setInterval(addFruit, frequencyFruit);
         setInterval(autoMove, frequencyAutoMove);
@@ -69,7 +69,9 @@ export default function createGame() {
     }
 
     function addBodyPlayer(player) {
-        player.body.push({ x: player.x, y: player.y });
+        for (let i = 0; i < 20; i++) {
+            player.body.push({ x: player.x, y: player.y });
+        }
     }
 
     function removePlayer(command) {
