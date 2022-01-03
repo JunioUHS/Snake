@@ -3,8 +3,8 @@ export default function createGame() {
         players: {},
         fruits: {},
         screen: {
-            width: 30,
-            height: 30
+            width: 1000,
+            height: 1000
         }
     };
 
@@ -12,10 +12,10 @@ export default function createGame() {
 
     function start() {
         const frequencyFruit = 2000;
-        // const frequencyAutoMove = 700;
+        const frequencyAutoMove = 15;
 
         setInterval(addFruit, frequencyFruit);
-        // setInterval(autoMove, frequencyAutoMove);
+        setInterval(autoMove, frequencyAutoMove);
     }
 
     function subscribe(observerFunction) {
@@ -37,10 +37,13 @@ export default function createGame() {
         const playerX = 'playerX' in command ? command.playerX : Math.floor(Math.random() * state.screen.width);
         const playerY = 'playerY' in command ? command.playerY : Math.floor(Math.random() * state.screen.height);
         const currentMovement = command.currentMovement ? command.currentMovement : 'ArrowRight';
-        const body = command.body ? command.body : [
-            { x: playerX - 1, y: playerY }, 
-            { x: playerX - 2, y: playerY }
-        ];
+        const defaultBody = [];
+        if (!command.body) {
+            for(let i = 1; i <= 40; i++) {
+                defaultBody.push({ x: playerX - i, y: playerY });
+            }
+        }
+        const body = command.body ? command.body : defaultBody;
 
         state.players[playerId] = {
             x: playerX,
@@ -111,7 +114,7 @@ export default function createGame() {
                 if (player.currentMovement !== 'ArrowDown') {
                     player.currentMovement = 'ArrowUp';
                     moveBody(player);
-                    player.y - 1 >= 0 ? player.y -= 1 : player.y += 29;
+                    player.y - 1 >= 0 ? player.y -= 1 : player.y += 999;
                 }
             },
             ArrowRight(player) {
@@ -132,7 +135,7 @@ export default function createGame() {
                 if (player.currentMovement !== 'ArrowRight') {
                     player.currentMovement = 'ArrowLeft';
                     moveBody(player);
-                    player.x - 1 >= 0 ? player.x -= 1 : player.x += 29;
+                    player.x - 1 >= 0 ? player.x -= 1 : player.x += 999;
                 }
             }
         }
