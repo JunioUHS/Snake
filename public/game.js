@@ -36,6 +36,8 @@ export default function createGame() {
         const playerId = command.playerId;
         const playerX = 'playerX' in command ? command.playerX : Math.floor(Math.random() * state.screen.width);
         const playerY = 'playerY' in command ? command.playerY : Math.floor(Math.random() * state.screen.height);
+        const width = 20;
+        const height = 20;
         const currentMovement = command.currentMovement ? command.currentMovement : 'ArrowRight';
         const defaultBody = [];
         if (!command.body) {
@@ -48,6 +50,8 @@ export default function createGame() {
         state.players[playerId] = {
             x: playerX,
             y: playerY,
+            width: width,
+            height: height,
             currentMovement: currentMovement,
             body: body
         };
@@ -57,6 +61,8 @@ export default function createGame() {
             playerId,
             playerX,
             playerY,
+            width,
+            height,
             currentMovement,
             body
         });
@@ -81,17 +87,23 @@ export default function createGame() {
         const fruitId = command ? command.fruitId : Math.floor(Math.random() * 10000000);
         const fruitX = command ? command.fruitX : Math.floor(Math.random() * state.screen.width);
         const fruitY = command ? command.fruitY : Math.floor(Math.random() * state.screen.height);
+        const width = 20;
+        const height = 20;
 
         state.fruits[fruitId] = {
             x: fruitX,
-            y: fruitY
+            y: fruitY,
+            width,
+            height
         };
 
         notifyAll({
             type: 'add-fruit',
             fruitId,
             fruitX,
-            fruitY
+            fruitY,
+            width,
+            height
         });
     }
 
@@ -121,14 +133,14 @@ export default function createGame() {
                 if (player.currentMovement !== 'ArrowLeft') {
                     player.currentMovement = 'ArrowRight';
                     moveBody(player);
-                    player.x + 1 < state.screen.width ? player.x += 1 : player.x = 0;
+                    player.x + player.width < state.screen.width ? player.x += 1 : player.x = 0;
                 }
             },
             ArrowDown(player) {
                 if (player.currentMovement !== 'ArrowUp') {
                     player.currentMovement = 'ArrowDown';
                     moveBody(player);
-                    player.y + 1 < state.screen.height ? player.y += 1 : player.y = 0;
+                    player.y + player.height < state.screen.height ? player.y += 1 : player.y = 0;
                 }
             },
             ArrowLeft(player) {
@@ -174,13 +186,49 @@ export default function createGame() {
 
     function checkForFruitCollision(playerId) {
         const player = state.players[playerId];
+        const playerX = player.x + player.width - 1;
+        const playerY = player.y + player.height - 1;
 
         for (const fruitId in state.fruits) {
             const fruit = state.fruits[fruitId];
+            const fruitX = fruit.x + fruit.width - 1;
+            const fruitY = fruit.y + fruit.height - 1;
 
-            if (player.x === fruit.x && player.y === fruit.y) {
-                addBodyPlayer(player);
-                removeFruit({ fruitId });
+            if (player.currentMovement === 'ArrowUp') {
+                if (fruitY === player.y) {
+                    if ( (fruit.x >= player.x && fruit.x <= playerX) || 
+                        (fruitX >= player.x && fruitX <= playerX) ) {
+                        addBodyPlayer(player);
+                        removeFruit({ fruitId });
+                    }
+                }
+
+            } else if (player.currentMovement === 'ArrowRight') {
+                if (fruit.x === playerX) {
+                    if ( (fruit.y >= player.y && fruit.y <= playerY) || 
+                        (fruitY >= player.y && fruitY <= playerY) ) {
+                        addBodyPlayer(player);
+                        removeFruit({ fruitId });
+                    }
+                }
+
+            } else if (player.currentMovement === 'ArrowDown') {
+                if (playerY === fruit.y) {
+                    if ( (player.x >= fruit.x && player.x <= fruitX) || 
+                        (playerX >= fruit.x && playerX <= fruitX) ) {
+                        addBodyPlayer(player);
+                        removeFruit({ fruitId });
+                    }
+                }
+
+            } else if (player.currentMovement === 'ArrowLeft') {
+                if (player.x === fruitX) {
+                    if ( (player.y >= fruit.y && player.y <= fruitY) || 
+                        (playerY >= fruit.y && playerY <= fruitY) ) {
+                        addBodyPlayer(player);
+                        removeFruit({ fruitId });
+                    }
+                }
             }
         }
     }
